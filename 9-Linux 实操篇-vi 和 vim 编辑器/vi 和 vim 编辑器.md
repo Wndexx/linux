@@ -36,7 +36,7 @@ vim Hello.java
 
 ### 四、vi 和 vim 三种模式的相互切换
 
-![1650763642874](E:\code\linux\9-Linux 实操篇-vi 和vim 编辑器\vi 和 vim 编辑器.assets\1650763642874.png)
+![1650763642874](E:\code\linux\9-Linux 实操篇-vi 和 vim 编辑器\vi 和 vim 编辑器.assets\1650763642874.png)
 
 
 
@@ -67,7 +67,7 @@ vim Hello.java
 
 
 
-![img](E:\code\linux\9-Linux 实操篇-vi 和vim 编辑器\vi 和 vim 编辑器.assets\vim_cn.gif)
+![img](E:\code\linux\9-Linux 实操篇-vi 和 vim 编辑器\vi 和 vim 编辑器.assets\vim_cn.gif)
 
 
 

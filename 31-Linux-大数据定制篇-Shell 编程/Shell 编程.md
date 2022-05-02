@@ -89,7 +89,7 @@ sh /root/shcode/hello.sh
 
 - Linux Shell 中的变量分为，==系统变量==和==用户自定义变量==
 
-- 系统变量：$HOME、$PWD、$SHELL、$USER 等等，比如 echo $HOME ..
+- 系统变量：\$HOME、\$PWD、\$SHELL、\$USER 等等，比如 echo $HOME ..
 
   ```bash
   [root@wndexx shcode]# echo $HOME

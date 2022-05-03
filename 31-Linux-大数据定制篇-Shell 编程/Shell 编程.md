@@ -776,6 +776,262 @@ sum=5050
 
 
 
+### 十一、read 获取输入
+
+#### 11.1 基本语法
+
+```bash
+read (选项) (参数)
+```
+
+> 选项
+
+| 选项 | 说明                                                         |
+| ---- | ------------------------------------------------------------ |
+| -p   | 指定读取值时的提示符                                         |
+| -t   | 指定读取值时等待的时间（秒），如果没有在指定的时间内输入，就不再等待了 |
+
+> 参数
+
+变量：指定读取值的变量名
+
+
+
+#### 11.2 应用实例
+
+```bash
+########### testread.sh ###############
+#!/bin/bash
+# 案例：读取控制台输入一个 NUM1 值
+read -p "请输入一个数NUM1=" NUM1 # 当程序执行的这一行时，会阻塞等待输入
+echo "你输入的NUM1=$NUM1"
+
+# 案例：读取控制台输入一个 NUM2 值，要求在 10 秒内输入
+read -t 10 -p  "请输入一个数NUM2=" NUM2
+echo "你输入的NUM2=$NUM2"
+
+
+[root@wndexx ~]# vim testread.sh
+[root@wndexx ~]# sh testread.sh 
+请输入一个数NUM1=1
+你输入的NUM1=1
+请输入一个数NUM2=2
+你输入的NUM2=2
+```
+
+
+
+
+
+
+
+### 十二、函数
+
+#### 12.1 介绍
+
+shell 编程和其它编程语言一样，有==系统函数==，也可以==自定义函数==
+
+
+
+#### 12.2 系统函数
+
+> basename
+
+```bash
+# 功能：返回完整路径最后 / 的后面部分，常用于获取文件名
+basename [pathname] [suffix]
+
+# 功能：删掉所有的前缀包括最后一个 "/"，然后将字符串显示出来
+basename [string] [suffix]
+
+# 选项：suffix 为后缀，如果 suffix 被指定了，basename 会将 pathname 或 string 中的 suffix 去掉
+
+# 案例：返回 /home/aaa/test/txt 的 "test.txt" 部分
+[root@wndexx ~]# basename /home/aaa/test.txt
+test.txt
+[root@wndexx ~]# basename /home/aaa/test.txt .txt
+test
+```
+
+
+
+> dirname
+
+```bash
+# 功能：返回完整路径最后 / 的前面的部分，常用于返回路径部分
+# 从指定的包含绝对路径的文件名中去除文件名（非目录的部分），返回返回剩下的路径（目录的部分）
+dirname 文件绝对路径
+
+# 案例：返回 /home/aaa/test/txt 的 /home/aaa
+[root@wndexx ~]# dirname /home/aaa/test.txt
+/home/aaa
+```
+
+
+
+#### 12.3 自定义函数
+
+> 基本语法
+
+```bash
+# 定义函数
+function 函数名(){
+    函数体
+    [return 返回值]
+}
+# 调用函数
+函数名 参数值
+```
+
+
+
+> 应用实例
+
+```bash
+################ testfun.sh ###############
+#!/bin/bash
+# 案例：计算输入的两个参数的和，getSum
+# (1) 定义函数 getSum
+function getSum(){
+        SUM=$[$n1+$n2]
+        echo "和=$SUM"
+}
+
+# 输入两个值
+read -p "请输入一个数n1=" n1
+read -p "请输入一个数n2=" n2
+
+# (2) 调用自定义函数
+getSum $n1 $n2
+
+[root@wndexx ~]# vim testfun.sh
+[root@wndexx ~]# sh testfun.sh 
+请输入一个数n1=1
+请输入一个数n2=2
+和=3
+```
+
+
+
+```bash
+#!/bin/bash
+function sum(){
+        SUM=$[$n1+$s2]
+        echo $SUM
+}
+n1=1
+s2=2
+# 注意：sum 后面不能直接将值传入，需要赋给相应的变量  sum 1 2 是错的
+sum $n1 $s2
+```
+
+
+
+
+
+### 十三、Shell 编程综合案例
+
+> 需求
+
+1. 每天凌晨 2:30 备份数据库 demoDB 到 /data/backup/db
+2. 备份开始和备份结束能够给出相应的提示信息
+3. 备份后的文件要求以备份时间为文件名，并打包成 .tar.gz 的实行，比如：2000-01-01_230101.tar.gz
+4. 在备份的同时，检查是否有 10 天前备份的数据库文件，如果有就将其删除
+
+
+
+```mysql
+# 登录 mysql
+mysql -uroot -p
+
+# 查看数据库
+show databases;
+
+# 创建数据库 demodb
+create databse if not exists demodb;
+
+# 打开数据库 demodb
+use demodb;
+
+# 创建表 user
+create table user(
+	id int, # 编号
+	name varchar(20) # 名字
+);
+
+# 向 user 表添加数据
+insert into user values(1,'zs'),(2,'ls'),(3,'ww');
+
+# 查看 user 表数据
+select * from user
+```
+
+
+
+![1651545243346](Shell 编程.assets/1651545243346.png)
+
+
+
+```bash
+#!/bin/bash
+
+# 1. 定义备份目录
+BACKUP=/data/backup/db
+
+# 2. 获取当前的时间
+DATETIME=$(date +%Y-%m-%d_%H%M%S)
+# echo $DATETIME
+
+# 3. 数据库的信息 
+# (1) 数据库的地址
+HOST=localhost
+# (2) 数据库的用户名
+DB_USER=root
+# (3) 数据库的密码
+DB_PWD=12345678
+# (4) 备份的数据库名
+DATABASE=demodb
+
+# 4. 创建备份目录
+# 如果不存在，就创建
+[ ! -d "${BACKUP}/${DATETIME}" ] && mkdir -p "${BACKUP}/${DATETIME}"
+
+# 5. 备份数据库
+# -q 快速备份
+# -R 包含函数和存储过程
+mysqldump -u${DB_USER} -p${DB_PWD} --host=${HOST} -q -R --databases ${DATABASE} | gzip > ${BACKUP}/${DATETIME}/$DATETIME.sql.gz
+
+# 6. 将文件处理成 tar.gz 
+# (1) 进入 /data/backup/db 目录
+cd ${BACKUP}
+# (2) 压缩
+tar -zcvf $DATETIME.tar.gz ${DATETIME}
+# (3) 删除 ${DATETIME} 目录
+rm -rf ${BACKUP}/${DATETIME}
+
+# 7. 删除 10 天前的备份文件 
+# -atime +10 	10天前 
+# -exec rm -rf {} \;  执行删除命令，";" 不能省略
+find ${BACKUP} -atime +10 -name "*.tar.gz" -exec rm -rf {} \;
+echo "备份数据库 ${DATABASE} 成功"
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 

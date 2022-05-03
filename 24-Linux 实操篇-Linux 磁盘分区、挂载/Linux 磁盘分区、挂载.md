@@ -221,6 +221,37 @@ sr0     11:0    1  4.3G  0 rom
 
 
 
+```bash
+[root@wndexx ~]# fdisk -l # 查看各个磁盘的信息
+
+磁盘 /dev/sda：21.5 GB, 21474836480 字节，41943040 个扇区
+Units = 扇区 of 1 * 512 = 512 bytes
+扇区大小(逻辑/物理)：512 字节 / 512 字节
+I/O 大小(最小/最佳)：512 字节 / 512 字节
+磁盘标签类型：dos
+磁盘标识符：0x000b5859
+
+   设备 Boot      Start         End      Blocks   Id  System
+/dev/sda1   *        2048     2099199     1048576   83  Linux
+/dev/sda2         2099200     6293503     2097152   82  Linux swap / Solaris
+/dev/sda3         6293504    41936895    17821696   83  Linux
+
+磁盘 /dev/sdb：1073 MB, 1073741824 字节，2097152 个扇区
+Units = 扇区 of 1 * 512 = 512 bytes
+扇区大小(逻辑/物理)：512 字节 / 512 字节
+I/O 大小(最小/最佳)：512 字节 / 512 字节
+磁盘标签类型：dos
+磁盘标识符：0xca2bea9d
+
+   设备 Boot      Start         End      Blocks   Id  System
+/dev/sdb1            2048     2097151     1047552   83  Linux
+
+```
+
+
+
+
+
 ##### 4.2.3 分区格式化
 
 通过对分区格式化指定分区的文件类型

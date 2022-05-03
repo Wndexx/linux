@@ -127,7 +127,7 @@ crontab -e
 */1 * * * * /home/my.sh # 注意不要写成 ./home/my.sh
 
 # 每天凌晨 2：00 将 mysql 数据库 testdb ，备份到文件中
-# 提示：指令为 mysqldump -uroot -p密码 数据库 > /home/db.bak
+# 提示：指令为 mysqldump -uroot -p密码 数据库 > /home/db.bak !!!!
 0 2 * * * mysqldump -uroot -proot testdb > /home/db.bak
 ```
 

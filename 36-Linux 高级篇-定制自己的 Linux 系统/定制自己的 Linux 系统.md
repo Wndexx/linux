@@ -295,7 +295,7 @@ Installation finished. No error reported.
 
 
 
-#### 3.6 拷贝内核文件指目标磁盘
+#### 3.6 拷贝内核文件至目标磁盘
 
 ```bash
 \cp -r /boot/* /mnt/boot

@@ -184,6 +184,11 @@ yum list | grep 软件列表
 
 # 安装指定的 yum 包
 yum install xxx
+
+-y, --assumeyes
+# 任何需要确认的地方都输入 yes
+# Assume yes; assume that the answer to any question which would be asked is yes. Configuration Option: assumeyes
+
 ```
 
 

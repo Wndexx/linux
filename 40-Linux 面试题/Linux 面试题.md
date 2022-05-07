@@ -105,9 +105,7 @@ http://192.168.200.10/order.html
 
 
 
-### 问题2 统计连接到服务器的各个 ip 情况
-
-> 统计连接到服务器的各个 ip 情况，并按连接数从大到小排序
+### 问题2 统计连接到服务器的各个 ip 情况，并按连接数从大到小排序
 
 ```bash
 netstat -an | grep ESTABLISHED | awk -F " " '{print $5}' | cut -d ":" -f 1 | sort | uniq -c | sort -nr
@@ -168,9 +166,7 @@ awk: cmd. line:1: ^ syntax error
 
 
 
-### 问题3 重置 mysql 数据库的 ROOT 用户的密码
-
-> 如果忘记了 mysql5.7 数据库的 ROOT 用户的密码，如何找回？
+### 问题3 如果忘记了 mysql5.7 数据库的 ROOT 用户的密码，如何找回
 
 
 
@@ -410,9 +406,7 @@ awk: cmd. line:1: ^ syntax error
 
   
 
-### 问题 4 统计 ip 访问情况
-
-> 写出指令：统计 ip 访问情况，要求分析 nginx 访问日志（access.log），找出访问页面数量在前 2 位的 ip
+### 问题 4 写出指令：统计 ip 访问情况，要求分析 nginx 访问日志（access.log），找出访问页面数量在前 2 位的 ip
 
 ```bash
 cat access.log | awk -F " " '{print $1}' | sort | uniq -c | sort -nr | head -2
@@ -499,9 +493,9 @@ cat access.log | awk -F " " '{print $1}' | sort | uniq -c | sort -nr | head -2
 
 
 
-### 问题5  tcpdump 监听与本机某个端口进行通信的某个 IP
+### 问题5 使用 tcpdump 监听本机，将来自 ip 192.168.200.1，tcp 端口为 22 的数据，保存的输出到 tcpdump.log，用来做数据分析
 
-> 使用 tcpdump 监听本机，将来自 ip 192.168.200.1，tcp 端口为 22 的数据，保存的输出到 tcpdump.log，用来做数据分析
+
 
 ```bash
 # tcpdump 监听某个ip 和本机某个端口的通信
@@ -526,9 +520,7 @@ listening on ens33, link-type EN10MB (Ethernet), capture size 262144 bytes
 
 
 
-### 问题 6 Nginx 模块的用途
-
-> 常用的 Nginx 模块，用来做什么
+### 问题 6 常用的 Nginx 模块，用来做什么
 
 ```bash
 rewrite 模块			实现重写功能
@@ -539,6 +531,433 @@ ngx_http_proxy_module		实现代理
 ngx_http_upstream_module 	实现定义后端服务器列表
 ngx_cache_purge				实现缓存清除功能
 ```
+
+
+
+
+
+### 问题7 如果你是系统管理员，在进行 Linux 系统权限划分时，应考虑哪些因素
+
+- 首先阐述 Linux 权限的主要对象
+
+  ![1651888303001](Linux 面试题.assets/1651888303001.png)
+
+
+
+
+
+- 根据自己的实际经验谈考虑因素
+
+  - 注意权限分离。比如：工作中，Linux 系统权限和数据库权限不要在同一个部门
+
+  - 权限最小原则（即：在满足使用的情况下最少优先）
+
+  - 减少使用 root  用户，尽量使用普通用户 + sudo 提权进行操作
+
+  - 重要的系统文件，比如 /etc/passwd，/etc/shadow，/etc/fstab，/etc/sudoers 等，日常建议使用 ==chattr==（change attribute） 锁定，需要操作时再打开
+
+    ![1651891495007](Linux 面试题.assets/1651891495007.png)
+
+    ```bash
+    # 锁定 /etc/passwd
+    # 1.
+    chattr +i /etc/passwd
+    
+    # 2. 将 chattr 文件移动到其它的目录并重名名，更加安全
+    mv /usr/bin/chattr /opt
+    mv /opt/chattr /opt/h
+    # 或
+    mv /usr/bin/chattr /opt/h
+    
+    
+    
+    
+    # 解锁
+    # 方法一
+    # 1. 将 chattr 重命名后的文件移动到原位置并重新修改名字为 chattr
+    mv /opt/h /opt/chattr
+    mv /opt/chattr /usr/bin/
+    # 或
+    mv /opt/h /usr/bin/chattr
+    
+    # 2.
+    chattr -i /etc/passwd
+    
+    # 方法二
+    /opt/h -i /etc/passwd
+    
+    ```
+
+    
+
+    
+
+    ```bash
+    [root@wndexx ~]# useradd smith
+    [root@wndexx ~]# userdel -r smith
+    [root@wndexx ~]# chattr +i /etc/passwd
+    [root@wndexx ~]# useradd scott
+    useradd：无法打开 /etc/passwd
+    [root@wndexx ~]# which chattr
+    /usr/bin/chattr
+    [root@wndexx ~]# mv /usr/bin/chattr /opt
+    [root@wndexx ~]# chattr -i /etc/passwd
+    -bash: /usr/bin/chattr: 没有那个文件或目录
+    [root@wndexx ~]# find / -name chattr
+    /opt/chattr
+    [root@wndexx ~]# mv /opt/chattr /opt/h
+    [root@wndexx ~]# /opt/h -i /etc/passwd
+    [root@wndexx ~]# useradd scott
+    [root@wndexx ~]# /opt/h +i /etc/passwd
+    [root@wndexx ~]# useradd scott2
+    useradd：无法打开 /etc/passwd
+    [root@wndexx ~]# mv /opt/h /opt/chattr
+    [root@wndexx ~]# mv /opt/chattr /usr/bin/
+    [root@wndexx ~]# chattr
+    Usage: chattr [-RVf] [-+=aAcCdDeijsStTu] [-v version] files...
+    [root@wndexx ~]# chattr -i /etc/passwd
+    [root@wndexx ~]# useradd scotty
+    ```
+
+    
+
+  - 使用 SUID，SGID，Sticky 设置特殊权限
+
+  - 可以利用工具，比如 ==chkrootkit==/==rootkit hunter== 检测 rootkit 脚本（rootkit 是入侵者使用工具，在不觉察的情况下建立入侵系统的途径）
+
+    ```bash
+    wget ftp://ftp.pangeia.com.br/pub/seg/pac/chkrootkit.tar.gz
+    tar -zxvf chkrootkit.tar.gz
+    cd chkrootkit-0.53/
+    # 运行 chkrootkit 可执行文件，就会自动检测
+    ./chkrootkit
+    ```
+
+    
+
+  - 利用 工具 ==Tripwire== 检测文件系统完整性
+
+
+
+
+
+### 问题8 权限操作思考题
+
+> 权限操作思考题
+>
+> 1. 用户 tom 对目录 /home/test 有执行和读写权限，/home/test/hello.java 是只读文件，问 tom 对 hello.java 文件能读吗？能修改吗？能删除吗？
+>
+>    答：能读，不能修改，能删除
+>
+> 2. 用户 tom 对==目录== /home/test 只有==读写==权限，/home/test/hello.java 是只读文件，问 tom 对 hello.java 文件能读吗？能修改吗？能删除吗？
+>
+>    答：不能读，不能修改，==不能删除==
+>
+> 3. 用户 tom 对目录 /home/test 只有执行权限，/home/test/hello.java 是只读文件，问 tom 对 hello.java 文件能读吗？能修改吗？能删除吗？
+>
+>    答：能读，不能修改，不能删除
+>
+> 4. 用户 tom 对目录 /home/test 只有执行和写权限，/home/test/hello.java 是只读文件，问 tom 对 hello.java 文件能读吗？能修改吗？能删除吗
+>
+>    答：能读，不能修改，能删除
+
+
+
+### 问题9 说明 CentOS7 启动流程，并说明和 CentOS6 相同和不同的地方
+
+
+
+### 问题10 列举 Linux 高级命令，至少 6 个
+
+```bash
+# 网络状态监控
+netstat
+
+# 系统运行状态
+top
+
+# 查看硬盘分区情况
+lsblk
+
+# 查找指定文件
+find
+
+# 查看运行进程
+ps -aux
+
+# 查看服务启动状态
+chkconfig
+
+# 管理系统服务 
+systemctl
+```
+
+
+
+
+
+### 问题11 Linux 查看内存、io 读写、磁盘存储、端口占用、进程查看 相关命令
+
+```bash
+# 查看内存
+top
+
+# io 读写
+yum install iotop
+iotop
+
+# 磁盘存储
+df -h
+
+# 端口占用
+[root@wndexx boot]# netstat -tunlp
+Active Internet connections (only servers)
+Proto Recv-Q Send-Q Local Address   Foreign Address    State       PID/Program name    
+tcp        0      0 127.0.0.1:6011   0.0.0.0:*        LISTEN      75459/sshd: tom@pts 
+tcp        0      0 0.0.0.0:3214     0.0.0.0:*        LISTEN      2203/perl           
+...
+
+# 进程查看
+[root@wndexx boot]# ps -aux | grep sshd
+root       1778  0.0  0.2 112984  4124 ?        Ss   09:04   0:00 /usr/sbin/sshd -D
+root       4496  0.0  0.2 159676  6008 ?        Ss   09:06   0:04 sshd: root@pts/0
+root      75442  0.0  0.2 159676  5944 ?        Ss   17:49   0:00 sshd: tom [priv]
+tom       75459  0.0  0.1 159676  2484 ?        S    17:49   0:00 sshd: tom@pts/1
+root      75738  0.0  0.2 159676  5932 ?        Ss   17:50   0:00 sshd: tom [priv]
+tom       75744  1.1  0.1 161140  3968 ?        S    17:50   0:05 sshd: tom@notty
+```
+
+
+
+### 问题12 使用 Linux 命令计算 t2.txt 第二列的和并输出
+
+> 使用 Linux 命令计算 t2.txt 第二列的和并输出
+>
+> 张三 40
+>
+> 李四 50
+>
+> 王五 60
+
+```bash
+cat t2.txt | awk -F " " '{sum+=$2} END {print sum}'
+```
+
+
+
+```bash
+[root@wndexx opt]# cat t2.txt 
+张三 40
+李四 50
+王五 60
+[root@wndexx opt]# cat t2.txt | awk -F " " '{sum+=$2} END {print sum}'
+150
+```
+
+
+
+
+
+### 问题13 shell 脚本里如何检查一个文件是否存在？并给出提示
+
+```bash
+if [ -f /opt/test.txt ]; then echo "存在"; else echo "不存在"; fi 
+```
+
+
+
+
+
+### 问题14 用 shell 写一个脚本，对文本 t3.txt 中无序的一列数字排序，并将总和输出
+
+```bash
+# {sum+=$0;print $0} 是处理每一行的代码
+# 这里需要 print $0 把每一行打印出来，因为 sort -n t3.txt 的结果已经交给了 awk 处理
+# 这里 $0 指该行所有字符；如果以 -F 分割后，$1 代表分割的第一个片段，...
+# {print "和="sum} 	END后面的是最后执行的代码
+# 类似地，BEGIN后面的是最先执行的代码
+sort -n t3.txt | awk '{sum+=$0;print $0} END {print "和="sum}'
+2
+3
+4
+5
+6
+7
+8
+9
+10
+和=54
+```
+
+
+
+
+
+### 问题15 请用指令写出查找当前文件夹（/home）下所有的文本文件内容中包含字符 "cat" 的文件名称
+
+```bash
+[root@wndexx opt]# grep -r "cat" /home | cut -d ":" -f 1 | uniq
+/home/tom2/.bash_history
+/home/xh/.bash_history
+/home/tom/.bash_history
+```
+
+
+
+### 问题16 请写出统计 /home 目录下所有文件个数和所有文件总行数的指令
+
+```bash
+# wc -l 统计行数
+[root@wndexx test1]# find /home -type f | wc -l
+114
+[root@wndexx test1]# find /home -type f | xargs wc -l
+       1 /home/tom2/.cache/abrt/lastnotification
+      12 /home/tom2/.bash_profile
+     140 /home/tom2/.viminfo
+      55 /home/tom2/.bash_history
+       2 /home/tom2/.bash_logout
+      11 /home/tom2/.bashrc
+      12 /home/xq/.bash_profile
+       2 /home/xq/.bash_logout
+      11 /home/xq/.bashrc
+      12 /home/www/.bash_profile
+       2 /home/www/.bash_logout
+      11 /home/www/.bashrc
+       0 /home/dg.txt
+       1 /home/thh/a
+       1 /home/fox/.cache/abrt/lastnotification
+      12 /home/fox/.bash_profile
+       0 /home/fox/.Xauthority
+       8 /home/fox/.bash_history
+       0 /home/fox/ok.txt
+       2 /home/fox/.bash_logout
+      11 /home/fox/.bashrc
+       1 /home/xh/.cache/abrt/lastnotification
+      12 /home/xh/.bash_profile
+       0 /home/xh/.Xauthority
+      29 /home/xh/.viminfo
+      17 /home/xh/.bash_history
+       2 /home/xh/.bash_logout
+      11 /home/xh/.bashrc
+       0 /home/ani/dg.txt
+       1 /home/bj/.cache/abrt/lastnotification
+      12 /home/bj/.bash_profile
+       0 /home/bj/.Xauthority
+      46 /home/bj/.viminfo
+      31 /home/bj/.bash_history
+       2 /home/bj/.bash_logout
+      11 /home/bj/.bashrc
+      12 /home/scotty/.bash_profile
+       2 /home/scotty/.bash_logout
+      11 /home/scotty/.bashrc
+       0 /home/ttt/a.txt
+       1 /home/test/hello.java
+       0 /home/bbb/hello2.txt
+       0 /home/bbb/hello.txt
+       1 /home/m.sh
+      12 /home/ts/.bash_profile
+       2 /home/ts/.bash_logout
+      11 /home/ts/.bashrc
+       1 /home/aa.tar.gz
+      12 /home/scott/.bash_profile
+       2 /home/scott/.bash_logout
+      11 /home/scott/.bashrc
+       1 /home/info.txt
+       1 /home/milan/.cache/abrt/lastnotification
+      12 /home/milan/.bash_profile
+       9 /home/milan/.bash_history
+       2 /home/milan/.bash_logout
+      11 /home/milan/.bashrc
+       0 /home/test1/b.txt
+       0 /home/test1/a
+       1 /home/test1/a.txt
+       7 /home/Hello.class
+     369 /home/mycal
+       1 /home/ss/.cache/abrt/lastnotification
+      12 /home/ss/.bash_profile
+       0 /home/ss/.Xauthority
+      36 /home/ss/.viminfo
+       5 /home/ss/.bash_history
+       2 /home/ss/.bash_logout
+      11 /home/ss/.bashrc
+       0 /home/abc
+       1 /home/jack/.cache/abrt/lastnotification
+      12 /home/jack/.bash_profile
+       0 /home/jack/.Xauthority
+      81 /home/jack/.viminfo
+      43 /home/jack/.bash_history
+       2 /home/jack/.bash_logout
+      11 /home/jack/.bashrc
+       1 /home/jack/jack.txt
+      76 /home/myprofile
+       0 /home/a.txt
+       1 /home/tom/.cache/abrt/lastnotification
+      12 /home/tom/.bash_profile
+       0 /home/tom/.Xauthority
+       1 /home/tom/test/hello.java
+     161 /home/tom/.viminfo
+     133 /home/tom/.bash_history
+       2 /home/tom/.bash_logout
+      11 /home/tom/.bashrc
+  299615 /home/myhome.zip
+      12 /home/jerry/.bash_profile
+       2 /home/jerry/.bash_logout
+      11 /home/jerry/.bashrc
+       5 /home/Hello.java
+       2 /home/my.sh
+       1 /home/apple.txt
+       0 /home/abc.txt
+       1 /home/mydate.txt
+       1 /home/wk/.cache/abrt/lastnotification
+      12 /home/wk/.bash_profile
+       0 /home/wk/.Xauthority
+       3 /home/wk/monkey.java
+       1 /home/wk/test/t11/t1/aa
+      35 /home/wk/.viminfo
+      10 /home/wk/.bash_history
+       0 /home/wk/ok.txt
+       2 /home/wk/.bash_logout
+      11 /home/wk/.bashrc
+       9 /home/hello.txt
+       1 /home/zwj/.cache/abrt/lastnotification
+      12 /home/zwj/.bash_profile
+      29 /home/zwj/.bash_history
+       2 /home/zwj/.bash_logout
+      11 /home/zwj/.bashrc
+       0 /home/hello.zip
+  301375 总用量
+```
+
+
+
+
+
+### 问题17 列出你了解的 web 服务器负载架构
+
+- Nginx
+- Haproxy
+- Keepalived
+- LVS
+
+
+
+
+
+### 问题18  每天晚上 10 点 30 分，打包站点目录 /var/spool/mail ，备份到 /home  目录下（每次备份按时间生成不同的备份包，比如按照年月日时分秒）
+
+```bash
+
+```
+
+
+
+
+
+
+
+
+
+
 
 
 

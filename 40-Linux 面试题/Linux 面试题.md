@@ -152,7 +152,7 @@ awk: cmd. line:1: ^ syntax error
 
 > awk	文本处理指令
 >
-> 基本语法：`awk -F 字符 '{处理程序}' 文件`
+> 基本语法：`awk -F 字符 'BEGIN{处理程序} {处理程序} END{处理程序}' 文件`
 >
 > 选项 
 >
@@ -520,7 +520,7 @@ listening on ens33, link-type EN10MB (Ethernet), capture size 262144 bytes
 
 
 
-### 问题 6 常用的 Nginx 模块，用来做什么
+### 问题6 常用的 Nginx 模块，用来做什么
 
 ```bash
 rewrite 模块			实现重写功能
@@ -771,6 +771,18 @@ if [ -f /opt/test.txt ]; then echo "存在"; else echo "不存在"; fi
 ### 问题14 用 shell 写一个脚本，对文本 t3.txt 中无序的一列数字排序，并将总和输出
 
 ```bash
+==== t3.txt ====
+9
+8
+7
+6
+5
+4
+3
+2
+10
+================
+
 # {sum+=$0;print $0} 是处理每一行的代码
 # 这里需要 print $0 把每一行打印出来，因为 sort -n t3.txt 的结果已经交给了 awk 处理
 # 这里 $0 指该行所有字符；如果以 -F 分割后，$1 代表分割的第一个片段，...
@@ -946,13 +958,55 @@ sort -n t3.txt | awk '{sum+=$0;print $0} END {print "和="sum}'
 ### 问题18  每天晚上 10 点 30 分，打包站点目录 /var/spool/mail ，备份到 /home  目录下（每次备份按时间生成不同的备份包，比如按照年月日时分秒）
 
 ```bash
+[root@wndexx ~]# vim mail.sh
 
+============================== mail.sh ===================================
+#!/bin/bash
+cd /var/spool/ && /bin/tar -zcf /home/mail-`date +%Y-%m-%d_%H%M%S`.tar.gz mail/
+===========================================================================
+
+
+[root@wndexx ~]# chmod u+x mail.sh
+[root@wndexx ~]# ./mail.sh 
+[root@wndexx mail]# crontab -e
+30 22 * * * /bin/sh /root/mail.sh
 ```
 
 
 
 
 
+### 问题19 如何优化 Linux 系统，说出你的方法
+
+![1651978410774](Linux 面试题.assets/1651978410774.png)
+
+> 架构优化
+
+![1651978425926](Linux 面试题.assets/1651978425926.png)
+
+- 网络优化
+- 磁盘 IO 优化
+- 文件连接数的优化
+- 安全性的优化
+- 防火墙
+- 内存，关掉不必要的服务
+
+
+
+> linux 系统本身的优化 - 规则
+
+- 不用 root，使用 `sudo` 提升权限
+- 定时的自动更新服务器时间，使用 `nptdate np1.aliyun.com`，让 `crond` 定时更新
+- 配置 yum 源，指向国内镜像
+- 配置合理的防火墙策略，打开必要的端口，关闭不必要的端口
+- 打开最大文件数（调整文件的描述的数量）
+  - `vim /etc/profile`，写上 `ulimit -SHn 65535`
+- 配置合理的监控策略
+- 配置合理的系统重要文件的备份策略。
+- 会安装的软件进行优化，比如 nginx，apache
+- 对内核参数进行优化 /etc/sysctl.conf
+- 锁定一些重要的系统文件 chattr /etc/passwd /etc/shadow /etc/inttable
+- 禁用不必要的服务 `setup`，`ntsysv`
 
 
 
@@ -962,14 +1016,7 @@ sort -n t3.txt | awk '{sum+=$0;print $0} END {print "和="sum}'
 
 
 
-
-
-
-
-
-
-
-
+==一些还需要详尽学习的命令，awk、sed、xargs==
 
 
 
